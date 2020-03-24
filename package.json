@@ -8,9 +8,10 @@
     "build": "tsc",
     "format": "prettier --write **/*.ts",
     "format-check": "prettier --check **/*.ts",
-    "pack": "ncc build",
+    "prepack": "npm run bundle",
+    "bundle": "ncc build src/main.ts -o dist",
     "test": "jest",
-    "all": "yarn build && yarn format && yarn pack && yarn test"
+    "all": "yarn build && yarn format && yarn bundle && yarn test"
   },
   "repository": {
     "type": "git",
