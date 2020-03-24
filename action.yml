@@ -1,6 +1,6 @@
-name: 'Kamil Kisiela'
+name: 'Comment on PR'
 description: 'Create or update a message in Pull Request'
-author: 'Kamil Kisiela'
+author: 'Kamil Kisiela <kamil.kisiela@gmail.com>'
 inputs:
   message:
     description: 'Message'
