@@ -20,7 +20,7 @@ jobs:
     - uses: actions/checkout@v2
     - uses: ./
       with: 
-        bot: 'kamilkisiela'
+        bot: 'github-actions'
         bot-token: ${{ secrets.GITHUB_TOKEN }}
         message: |
           It works!
@@ -28,3 +28,5 @@ jobs:
           Multi line message
 
               with markdown
+
+          Looks gooooood
