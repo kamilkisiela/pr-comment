@@ -489,6 +489,10 @@ function run() {
                 Authorization: `Bearer ${core.getInput('bot-token')}`
             };
             const prId = getPullRequestID(process.env.GITHUB_REF);
+            if (!prId) {
+                core.info('Skipping... Not a Pull Request');
+                return;
+            }
             const api = createAPI(headers);
             const existingId = yield api.find(prId, core.getInput('bot'));
             const message = core.getInput('message');
@@ -551,7 +555,7 @@ function createAPI(headers) {
 function getPullRequestID(ref) {
     const result = /refs\/pull\/(\d+)\/merge/g.exec(ref);
     if (!result) {
-        throw new Error('Github reference not found.');
+        return;
     }
     const [, pullRequestId] = result;
     return pullRequestId;
