@@ -1,4 +1,4 @@
-name: 'Comment on PR'
+name: 'Comment on Pull Request'
 description: 'Create or update a message in Pull Request'
 author: 'Kamil Kisiela <kamil.kisiela@gmail.com>'
 inputs:
