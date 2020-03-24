@@ -1,10 +1,19 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'Kamil Kisiela'
+description: 'Create or update a message in Pull Request'
+author: 'Kamil Kisiela'
 inputs:
-  myInput:              # change this
-    description: 'input description here'
-    default: 'default value if applicable'
+  message:
+    description: 'Message'
+    required: true
+  bot:
+    description: 'Name of the bot'
+    required: true
+  bot-token:
+    description: 'GitHub Token of the bot'
+    required: true  
 runs:
   using: 'node12'
   main: 'dist/index.js'
+branding:
+  icon: 'message-circle'  
+  color: 'purple'
