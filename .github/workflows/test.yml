@@ -22,4 +22,9 @@ jobs:
       with: 
         bot: 'kamilkisiela'
         bot-token: ${{ secrets.GITHUB_TOKEN }}
-        message: 'It works!'
+        message: |
+          It works!
+
+          Multi line message
+
+              with markdown
