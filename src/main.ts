@@ -86,7 +86,7 @@ function createAPI(headers: Record<string, string>) {
 }
 
 function getPullRequestID(ref: string) {
-  core.info(`GitHub Ref: ${ref}`);
+  core.info(`GitHub Ref: ${ref}`)
   const result = /refs\/pull\/(\d+)\/merge/g.exec(ref)
 
   if (!result) {
