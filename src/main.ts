@@ -9,11 +9,20 @@ const url = `https://api.github.com/repos/${owner}/${repo}`
 async function run(): Promise<void> {
   try {
     core.debug('Running PR Comment Action...')
+    const token = core.getInput('bot-token', {
+      required: true
+    })
+    const bot = core.getInput('bot', {
+      required: true
+    })
+    const message = core.getInput('message', {
+      required: true
+    })
 
     const headers = {
-      Authorization: `Bearer ${core.getInput('bot-token')}`
+      Authorization: `Bearer ${token}`
     }
-    const prId = getPullRequestID(process.env.GITHUB_REF!)
+    const prId = await getPullRequestID(process.env.GITHUB_REF!)
 
     if (!prId) {
       core.info('Skipping... Not a Pull Request')
@@ -21,9 +30,7 @@ async function run(): Promise<void> {
     }
 
     const api = createAPI(headers)
-    const existingId = await api.find(prId, core.getInput('bot'))
-
-    const message = core.getInput('message')
+    const existingId = await api.find(prId, bot)
 
     if (existingId) {
       await api.update(existingId, message)
@@ -87,33 +94,50 @@ function createAPI(headers: Record<string, string>) {
   }
 }
 
-function getPullRequestID(ref: string) {
+async function getPullRequestID(ref: string) {
   core.info(`GitHub Ref: ${ref}`)
-  core.info(`Context: ${github.context.payload.pull_request?.number}`)
 
+  core.info('Looking for Pull Request number in context')
   if (github.context.payload.pull_request?.number) {
-    core.info('Looking for Pull Request number in context')
     return github.context.payload.pull_request.number
   }
 
-  const result = /refs\/pull\/(\d+)\/merge/g.exec(ref)
+  core.info('Looking for Pull Request in ref')
+  const refResult = /refs\/pull\/(\d+)\/merge/g.exec(ref)
 
-  if (!result) {
-    const gevent = JSON.parse(
-      readFileSync(process.env.GITHUB_EVENT_PATH!, {
-        encoding: 'utf8'
-      })
-    )
+  if (refResult) {
+    const [, pullRequestId] = refResult
+    return pullRequestId
+  }
 
-    core.info('Looking for Pull Request number in event')
+  core.info('Looking for Pull Request number in event')
+  const gevent = JSON.parse(
+    readFileSync(process.env.GITHUB_EVENT_PATH!, {
+      encoding: 'utf8'
+    })
+  )
 
+  if (gevent?.pull_request?.number) {
     return gevent?.pull_request?.number
   }
 
-  core.info('Using ref')
+  core.info('Looking for Pull Request number in Github API')
+  const token = core.getInput('github-token')
 
-  const [, pullRequestId] = result
-  return pullRequestId
+  if (!token) {
+    core.info('Skipping... github-token input is missing')
+  }
+
+  const client = new github.GitHub(token, {})
+  const result = await client.repos.listPullRequestsAssociatedWithCommit({
+    owner: github.context.repo.owner,
+    repo: github.context.repo.repo,
+    commit_sha: github.context.sha
+  })
+
+  if (result.data.length) {
+    return result.data[0]?.number
+  }
 }
 
 run()

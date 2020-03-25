@@ -3369,17 +3369,25 @@ function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             core.debug('Running PR Comment Action...');
+            const token = core.getInput('bot-token', {
+                required: true
+            });
+            const bot = core.getInput('bot', {
+                required: true
+            });
+            const message = core.getInput('message', {
+                required: true
+            });
             const headers = {
-                Authorization: `Bearer ${core.getInput('bot-token')}`
+                Authorization: `Bearer ${token}`
             };
-            const prId = getPullRequestID(process.env.GITHUB_REF);
+            const prId = yield getPullRequestID(process.env.GITHUB_REF);
             if (!prId) {
                 core.info('Skipping... Not a Pull Request');
                 return;
             }
             const api = createAPI(headers);
-            const existingId = yield api.find(prId, core.getInput('bot'));
-            const message = core.getInput('message');
+            const existingId = yield api.find(prId, bot);
             if (existingId) {
                 yield api.update(existingId, message);
                 core.info('Updated a comment');
@@ -3437,24 +3445,41 @@ function createAPI(headers) {
     };
 }
 function getPullRequestID(ref) {
-    var _a, _b, _c;
-    core.info(`GitHub Ref: ${ref}`);
-    core.info(`Context: ${(_a = github.context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.number}`);
-    if ((_b = github.context.payload.pull_request) === null || _b === void 0 ? void 0 : _b.number) {
+    var _a, _b, _c, _d;
+    return __awaiter(this, void 0, void 0, function* () {
+        core.info(`GitHub Ref: ${ref}`);
         core.info('Looking for Pull Request number in context');
-        return github.context.payload.pull_request.number;
-    }
-    const result = /refs\/pull\/(\d+)\/merge/g.exec(ref);
-    if (!result) {
+        if ((_a = github.context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.number) {
+            return github.context.payload.pull_request.number;
+        }
+        core.info('Looking for Pull Request in ref');
+        const refResult = /refs\/pull\/(\d+)\/merge/g.exec(ref);
+        if (refResult) {
+            const [, pullRequestId] = refResult;
+            return pullRequestId;
+        }
+        core.info('Looking for Pull Request number in event');
         const gevent = JSON.parse(fs_1.readFileSync(process.env.GITHUB_EVENT_PATH, {
             encoding: 'utf8'
         }));
-        core.info('Looking for Pull Request number in event');
-        return (_c = gevent === null || gevent === void 0 ? void 0 : gevent.pull_request) === null || _c === void 0 ? void 0 : _c.number;
-    }
-    core.info('Using ref');
-    const [, pullRequestId] = result;
-    return pullRequestId;
+        if ((_b = gevent === null || gevent === void 0 ? void 0 : gevent.pull_request) === null || _b === void 0 ? void 0 : _b.number) {
+            return (_c = gevent === null || gevent === void 0 ? void 0 : gevent.pull_request) === null || _c === void 0 ? void 0 : _c.number;
+        }
+        core.info('Looking for Pull Request number in Github API');
+        const token = core.getInput('github-token');
+        if (!token) {
+            core.info('Skipping... github-token input is missing');
+        }
+        const client = new github.GitHub(token, {});
+        const result = yield client.repos.listPullRequestsAssociatedWithCommit({
+            owner: github.context.repo.owner,
+            repo: github.context.repo.repo,
+            commit_sha: github.context.sha
+        });
+        if (result.data.length) {
+            return (_d = result.data[0]) === null || _d === void 0 ? void 0 : _d.number;
+        }
+    });
 }
 run();
 
