@@ -89,8 +89,10 @@ function createAPI(headers: Record<string, string>) {
 
 function getPullRequestID(ref: string) {
   core.info(`GitHub Ref: ${ref}`)
+  core.info(`Context: ${github.context.payload.pull_request?.number}`)
 
   if (github.context.payload.pull_request?.number) {
+    core.info('Looking for Pull Request number in context')
     return github.context.payload.pull_request.number
   }
 
@@ -103,8 +105,12 @@ function getPullRequestID(ref: string) {
       })
     )
 
+    core.info('Looking for Pull Request number in event')
+
     return gevent?.pull_request?.number
   }
+
+  core.info('Using ref')
 
   const [, pullRequestId] = result
   return pullRequestId
