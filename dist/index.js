@@ -3469,6 +3469,7 @@ function getPullRequestID(ref) {
         const token = core.getInput('github-token');
         if (!token) {
             core.info('Skipping... github-token input is missing');
+            return;
         }
         const client = new github.GitHub(token, {});
         const result = yield client.repos.listPullRequestsAssociatedWithCommit({

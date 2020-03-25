@@ -126,6 +126,7 @@ async function getPullRequestID(ref: string) {
 
   if (!token) {
     core.info('Skipping... github-token input is missing')
+    return
   }
 
   const client = new github.GitHub(token, {})
