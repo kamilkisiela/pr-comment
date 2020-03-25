@@ -1,5 +1,6 @@
 import * as core from '@actions/core'
 import axios from 'axios'
+import {readFileSync} from 'fs'
 
 const [owner, repo] = process.env.GITHUB_REPOSITORY!.split('/')
 const url = `https://api.github.com/repos/${owner}/${repo}`
@@ -90,7 +91,13 @@ function getPullRequestID(ref: string) {
   const result = /refs\/pull\/(\d+)\/merge/g.exec(ref)
 
   if (!result) {
-    return
+    const gevent = JSON.parse(
+      readFileSync(process.env.GITHUB_EVENT_PATH!, {
+        encoding: 'utf8'
+      })
+    )
+
+    return gevent?.pull_request?.number
   }
 
   const [, pullRequestId] = result

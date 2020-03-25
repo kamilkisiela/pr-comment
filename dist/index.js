@@ -479,6 +479,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(470));
 const axios_1 = __importDefault(__webpack_require__(53));
+const fs_1 = __webpack_require__(747);
 const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
 const url = `https://api.github.com/repos/${owner}/${repo}`;
 function run() {
@@ -553,10 +554,14 @@ function createAPI(headers) {
     };
 }
 function getPullRequestID(ref) {
+    var _a;
     core.info(`GitHub Ref: ${ref}`);
     const result = /refs\/pull\/(\d+)\/merge/g.exec(ref);
     if (!result) {
-        return;
+        const gevent = JSON.parse(fs_1.readFileSync(process.env.GITHUB_EVENT_PATH, {
+            encoding: 'utf8'
+        }));
+        return (_a = gevent === null || gevent === void 0 ? void 0 : gevent.pull_request) === null || _a === void 0 ? void 0 : _a.number;
     }
     const [, pullRequestId] = result;
     return pullRequestId;
@@ -3199,6 +3204,13 @@ module.exports = function isCancel(value) {
   return !!(value && value.__CANCEL__);
 };
 
+
+/***/ }),
+
+/***/ 747:
+/***/ (function(module) {
+
+module.exports = require("fs");
 
 /***/ }),
 
