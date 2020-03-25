@@ -1,4 +1,5 @@
 import * as core from '@actions/core'
+import * as github from '@actions/github'
 import axios from 'axios'
 import {readFileSync} from 'fs'
 
@@ -88,6 +89,11 @@ function createAPI(headers: Record<string, string>) {
 
 function getPullRequestID(ref: string) {
   core.info(`GitHub Ref: ${ref}`)
+
+  if (github.context.payload.pull_request?.number) {
+    return github.context.payload.pull_request.number
+  }
+
   const result = /refs\/pull\/(\d+)\/merge/g.exec(ref)
 
   if (!result) {
