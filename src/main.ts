@@ -15,9 +15,13 @@ async function run(): Promise<void> {
     const bot = core.getInput('bot', {
       required: true
     })
-    const message = core.getInput('message', {
+    let message = core.getInput('message', {
       required: true
-    })
+    });
+
+    if (isFilepath(message)) {
+      message = readFileSync(message, 'utf-8');
+    }
 
     const headers = {
       Authorization: `Bearer ${token}`
@@ -139,6 +143,10 @@ async function getPullRequestID(ref: string) {
   if (result.data.length) {
     return result.data[0]?.number
   }
+}
+
+function isFilepath(filepath: string) {
+  return /\.[a-z]{2,}$/i.test(filepath);
 }
 
 run()

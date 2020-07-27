@@ -3375,9 +3375,12 @@ function run() {
             const bot = core.getInput('bot', {
                 required: true
             });
-            const message = core.getInput('message', {
+            let message = core.getInput('message', {
                 required: true
             });
+            if (isFilepath(message)) {
+                message = fs_1.readFileSync(message, 'utf-8');
+            }
             const headers = {
                 Authorization: `Bearer ${token}`
             };
@@ -3481,6 +3484,9 @@ function getPullRequestID(ref) {
             return (_d = result.data[0]) === null || _d === void 0 ? void 0 : _d.number;
         }
     });
+}
+function isFilepath(filepath) {
+    return /\.[a-z]{2,}$/i.test(filepath);
 }
 run();
 
