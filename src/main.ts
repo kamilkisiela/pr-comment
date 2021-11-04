@@ -27,7 +27,7 @@ async function run(): Promise<void> {
       message = readFileSync(message, 'utf-8')
     }
 
-    message = `<!-- ${commentKey} -->\n`
+    message = `<!-- ${commentKey} -->\n${message}`
 
     const headers = {
       Authorization: `Bearer ${token}`

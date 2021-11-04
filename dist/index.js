@@ -3384,7 +3384,7 @@ function run() {
             if (isFilepath(message)) {
                 message = fs_1.readFileSync(message, 'utf-8');
             }
-            message = `<!-- ${commentKey} -->\n`;
+            message = `<!-- ${commentKey} -->\n${message}`;
             const headers = {
                 Authorization: `Bearer ${token}`
             };
