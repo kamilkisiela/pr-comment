@@ -17,11 +17,17 @@ async function run(): Promise<void> {
     })
     let message = core.getInput('message', {
       required: true
-    });
+    })
+    let commentKey =
+      core.getInput('commentKey', {
+        required: false
+      }) || 'prCommentKey'
 
     if (isFilepath(message)) {
-      message = readFileSync(message, 'utf-8');
+      message = readFileSync(message, 'utf-8')
     }
+
+    message = `<!-- ${commentKey} -->\n`
 
     const headers = {
       Authorization: `Bearer ${token}`
@@ -34,7 +40,7 @@ async function run(): Promise<void> {
     }
 
     const api = createAPI(headers)
-    const existingId = await api.find(prId, bot)
+    const existingId = await api.find(prId, bot, commentKey)
 
     if (existingId) {
       await api.update(existingId, message)
@@ -49,7 +55,7 @@ async function run(): Promise<void> {
 }
 
 function createAPI(headers: Record<string, string>) {
-  async function find(prId: string, botName: string) {
+  async function find(prId: string, botName: string, commentKey: string) {
     const {data} = await axios.get(`${url}/issues/${prId}/comments`, {
       responseType: 'json',
       headers
@@ -57,7 +63,11 @@ function createAPI(headers: Record<string, string>) {
     const comments = data
 
     if (comments && Array.isArray(comments)) {
-      const found = comments.find(comment => comment.user.login === botName)
+      const found = comments.find(
+        comment =>
+          comment.user.login === botName &&
+          (comment.body || '').includes(`<!-- ${commentKey} -->`)
+      )
 
       if (found) {
         return found.id
@@ -146,7 +156,7 @@ async function getPullRequestID(ref: string) {
 }
 
 function isFilepath(filepath: string) {
-  return /\.[a-z]{2,}$/i.test(filepath);
+  return /\.[a-z]{2,}$/i.test(filepath)
 }
 
 run()
