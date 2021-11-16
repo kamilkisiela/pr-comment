@@ -12,7 +12,11 @@ inputs:
     description: 'GitHub Token of the bot'
     required: true
   github-token:
+    required: true
     description: 'Github Token to access repository'
+  commentKey:
+    required: false
+    description: 'Identification key for the comment - used for editing purposes'
 runs:
   using: 'node12'
   main: 'dist/index.js'
